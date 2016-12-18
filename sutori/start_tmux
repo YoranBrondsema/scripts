@@ -1,0 +1,48 @@
+#!/bin/bash
+SESSION="hstry-education"
+
+tmux new-session -d -s $SESSION
+
+# Setup a window for Rails development server and Ember development server
+tmux rename-window -t $SESSION:0 'development'
+tmux split-window -h
+tmux select-pane -t 0
+tmux send-keys "cd backend" C-m
+tmux send-keys "foreman run rails s" C-m
+tmux select-pane -t 1
+tmux send-keys "cd frontend" C-m
+tmux send-keys "ember s --proxy http://localhost:3000" C-m
+
+# Setup a window for Rails test server and Ember test server
+tmux new-window -t $SESSION:1 -n 'test'
+tmux split-window -h
+tmux select-pane -t 0
+tmux send-keys "cd backend" C-m
+tmux send-keys "RAILS_ENV=test rails s webrick -p 3001 -P ./tmp/pids/test.pid" C-m
+tmux select-pane -t 1
+tmux send-keys "cd frontend" C-m
+tmux send-keys "ember s --environment test --proxy http://localhost:3001 --port 4201" C-m
+
+# Setup a window for running guard
+tmux new-window -t $SESSION:2 -n 'guard'
+tmux send-keys "cd backend" C-m
+tmux send-keys "bundle exec guard" C-m
+
+# Backend tests
+tmux new-window -t $SESSION:3 -n 'test-be'
+tmux send-keys "cd backend/spec" C-m
+
+# Frontend tests
+tmux new-window -t $SESSION:4 -n 'test-fe'
+tmux send-keys "cd frontend/tests" C-m
+
+# Backend development
+tmux new-window -t $SESSION:5 -n 'backend'
+tmux send-keys "cd backend" C-m
+
+# Frontend development
+tmux new-window -t $SESSION:6 -n 'frontend'
+tmux send-keys "cd frontend" C-m
+
+# Attach to session
+tmux attach-session -t $SESSION
