@@ -1,6 +1,9 @@
 #!/bin/bash
 SESSION="hstry-education"
 
+# Launch docker
+docker-compose up -d
+
 tmux new-session -d -s $SESSION
 
 # Setup a window for Rails development server and Ember development server
@@ -8,25 +11,25 @@ tmux rename-window -t $SESSION:0 'development'
 tmux split-window -h
 tmux select-pane -t 0
 tmux send-keys "cd backend" C-m
-tmux send-keys "foreman run rails s" C-m
+tmux send-keys "docker attach sutori_backend_web_1" C-m
 tmux select-pane -t 1
 tmux send-keys "cd frontend" C-m
-tmux send-keys "ember s --proxy http://localhost:3000" C-m
+tmux send-keys "docker attach sutori_frontend_web_1" C-m
 
 # Setup a window for Rails test server and Ember test server
 tmux new-window -t $SESSION:1 -n 'test'
 tmux split-window -h
 tmux select-pane -t 0
 tmux send-keys "cd backend" C-m
-tmux send-keys "RAILS_ENV=test rails s webrick -p 3001 -P ./tmp/pids/test.pid" C-m
+tmux send-keys "docker attach sutori_backend_test_1" C-m
 tmux select-pane -t 1
 tmux send-keys "cd frontend" C-m
-tmux send-keys "ember s --environment test --proxy http://localhost:3001 --port 4201" C-m
+tmux send-keys "docker attach sutori_frontend_test_1" C-m
 
 # Setup a window for running guard
 tmux new-window -t $SESSION:2 -n 'guard'
 tmux send-keys "cd backend" C-m
-tmux send-keys "bundle exec guard" C-m
+tmux send-keys "docker-compose run backend_web bundle exec guard" C-m
 
 # Backend tests
 tmux new-window -t $SESSION:3 -n 'test-be'
